@@ -1,10 +1,4 @@
-from menu import Menu
-  from wallet_service import WalletService
-if __name__ == "__main__":
-    menu = Menu()
-    menu.start()
-    
-  
+from wallet_service import WalletService
 
 
 def display_menu():
