@@ -266,14 +266,14 @@ admin123
 
 # Team Contribution
 
-### Person A
+### Abhishek Saini
 
 - wallet.py
 - transaction.py
 - wallet_service.py
 - main.py
 
-### Person B
+### Darshil Saini
 
 - login.py
 - wallet_manager.py
