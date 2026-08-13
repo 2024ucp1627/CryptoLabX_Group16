@@ -1,5 +1,16 @@
 from wallet import Wallet
+def transfer(self, from_wallet_id, to_wallet_id, amount):
+    sender = self.get_wallet(from_wallet_id)
+    receiver = self.get_wallet(to_wallet_id)
 
+    if sender is None or receiver is None:
+        return False
+
+    if sender.withdraw(amount):
+        receiver.deposit(amount)
+        return True
+
+    return False
 
 class WalletService:
     def __init__(self):
