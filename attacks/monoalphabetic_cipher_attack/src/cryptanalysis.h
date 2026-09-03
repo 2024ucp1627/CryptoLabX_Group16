@@ -29,4 +29,6 @@ bool verify_solution(
     const std::map<char, char>& substitution
 );
 
+void display_word_patterns(const std::string& ciphertext);
+
 #endif

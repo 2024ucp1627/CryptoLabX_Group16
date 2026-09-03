@@ -76,9 +76,11 @@ void display_partial_plaintext(
                 static_cast<unsigned char>(ch)
             );
 
-            if (substitution.find(upper) != substitution.end())
+            auto it = substitution.find(upper);
+
+            if (it != substitution.end())
             {
-                std::cout << substitution.at(upper);
+                std::cout << it->second;
             }
             else
             {
@@ -134,21 +136,19 @@ void iterative_cryptanalysis(const std::string& ciphertext)
 {
     std::map<char, char> substitution;
 
-    char cipherLetter;
-    char plainLetter;
+    std::cout << "\n=== ITERATIVE CRYPTANALYSIS ===\n";
 
-    std::cout << "\n===== ITERATIVE CRYPTANALYSIS =====\n";
+    std::cout << "\nInitial partial plaintext:\n";
+    display_partial_plaintext(ciphertext, substitution);
 
     while (true)
     {
-        std::cout << "\nCurrent partial plaintext:\n";
+        char cipherLetter;
+        char plainLetter;
 
-        display_partial_plaintext(
-            ciphertext,
-            substitution
-        );
+        std::cout << "\nEnter ciphertext letter "
+                     "(0 to finish): ";
 
-        std::cout << "\nEnter ciphertext letter (0 to finish): ";
         std::cin >> cipherLetter;
 
         cipherLetter = std::toupper(
@@ -160,38 +160,80 @@ void iterative_cryptanalysis(const std::string& ciphertext)
             break;
         }
 
+        if (!std::isalpha(
+                static_cast<unsigned char>(cipherLetter)))
+        {
+            std::cout << "Invalid ciphertext letter.\n";
+            continue;
+        }
+
         std::cout << "Enter proposed plaintext letter: ";
+
         std::cin >> plainLetter;
 
         plainLetter = std::toupper(
             static_cast<unsigned char>(plainLetter)
         );
 
+        if (!std::isalpha(
+                static_cast<unsigned char>(plainLetter)))
+        {
+            std::cout << "Invalid plaintext letter.\n";
+            continue;
+        }
+
+        std::map<char, char> candidate = substitution;
+
         if (test_substitution(
                 cipherLetter,
                 plainLetter,
-                substitution))
+                candidate))
         {
-            std::cout << "Substitution ACCEPTED: "
-                      << cipherLetter << " -> "
-                      << plainLetter << "\n";
+            substitution = candidate;
+
+            std::cout << "\nACCEPTED: "
+                      << cipherLetter
+                      << " -> "
+                      << plainLetter
+                      << "\n";
+
+            std::cout << "\nUpdated partial plaintext:\n";
+
+            display_partial_plaintext(
+                ciphertext,
+                substitution
+            );
         }
         else
         {
-            std::cout << "Substitution REJECTED: "
-                      << cipherLetter << " -> "
-                      << plainLetter << "\n";
+            std::cout << "\nREJECTED: "
+                      << cipherLetter
+                      << " -> "
+                      << plainLetter
+                      << "\n";
+
+            std::cout << "The substitution conflicts "
+                         "with the current mapping.\n";
         }
     }
 
-    std::cout << "\nFinal partial plaintext:\n";
+    std::cout << "\n=== FINAL PARTIAL PLAINTEXT ===\n";
 
     display_partial_plaintext(
         ciphertext,
         substitution
     );
-}
 
+    std::cout << "\n=== RECOVERED SUBSTITUTIONS ===\n";
+
+    for (const auto& entry : substitution)
+    {
+        std::cout << entry.first
+                  << " -> "
+                  << entry.second
+                  << "\n";
+    }
+}
 
 bool verify_solution(
     const std::string& plaintext,
@@ -222,4 +264,45 @@ bool verify_solution(
     }
 
     return reencrypted == ciphertext;
+}
+
+void display_word_patterns(const std::string& ciphertext)
+{
+    std::map<std::string, std::vector<int>> wordPatterns;
+    
+    std::string word;
+
+    for (char ch : ciphertext)
+    {
+        if (std::isalpha(static_cast<unsigned char>(ch)))
+        {
+            word += std::toupper(
+                static_cast<unsigned char>(ch)
+            );
+        }
+        else if (!word.empty())
+        {
+            wordPatterns[word] = getWordPattern(word);
+            word.clear();
+        }
+    }
+
+    if (!word.empty())
+    {
+        wordPatterns[word] = getWordPattern(word);
+    }
+
+    std::cout << "\n=== WORD PATTERNS ===\n\n";
+
+    for (const auto& entry : wordPatterns)
+    {
+        std::cout << entry.first << " -> ";
+
+        for (int number : entry.second)
+        {
+            std::cout << number << " ";
+        }
+
+        std::cout << "\n";
+    }
 }
